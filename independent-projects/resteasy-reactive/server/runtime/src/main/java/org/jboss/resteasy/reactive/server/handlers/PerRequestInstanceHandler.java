@@ -33,7 +33,7 @@ public class PerRequestInstanceHandler implements ServerRestHandler {
             unwrapped = clientProxyUnwrapper.apply(unwrapped);
         }
         ((ResteasyReactiveInjectionTarget) unwrapped)
-                .__quarkus_rest_inject(requestContext);
+                .__quarkus_rest_inject(requestContext, null);
         requestContext.registerCompletionCallback(new CompletionCallback() {
             @Override
             public void onComplete(Throwable throwable) {

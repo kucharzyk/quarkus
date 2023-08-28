@@ -67,8 +67,13 @@ public class ClassInjectorTransformer implements BiFunction<String, ClassVisitor
             .replace('.', '/');
     private static final String QUARKUS_REST_INJECTION_CONTEXT_DESCRIPTOR = "L" + QUARKUS_REST_INJECTION_CONTEXT_BINARY_NAME
             + ";";
+
+    private static final String STRING_BINARY_NAME = String.class.getName().replace('.', '/');
+    private static final String STRING_DESCRIPTOR = "L" + STRING_BINARY_NAME + ";";
+
     private static final String INJECT_METHOD_NAME = "__quarkus_rest_inject";
-    private static final String INJECT_METHOD_DESCRIPTOR = "(" + QUARKUS_REST_INJECTION_CONTEXT_DESCRIPTOR + ")V";
+    private static final String INJECT_METHOD_DESCRIPTOR = "(" + QUARKUS_REST_INJECTION_CONTEXT_DESCRIPTOR + STRING_DESCRIPTOR
+            + ")V";
 
     private static final String QUARKUS_REST_DEPLOYMENT_BINARY_NAME = Deployment.class.getName().replace('.', '/');
     private static final String QUARKUS_REST_DEPLOYMENT_DESCRIPTOR = "L" + QUARKUS_REST_DEPLOYMENT_BINARY_NAME + ";";
@@ -81,9 +86,6 @@ public class ClassInjectorTransformer implements BiFunction<String, ClassVisitor
 
     private static final String OBJECT_BINARY_NAME = Object.class.getName().replace('.', '/');
     private static final String OBJECT_DESCRIPTOR = "L" + OBJECT_BINARY_NAME + ";";
-
-    private static final String STRING_BINARY_NAME = String.class.getName().replace('.', '/');
-    private static final String STRING_DESCRIPTOR = "L" + STRING_BINARY_NAME + ";";
 
     private static final String BYTE_ARRAY_DESCRIPTOR = "[B";
 
@@ -227,12 +229,15 @@ public class ClassInjectorTransformer implements BiFunction<String, ClassVisitor
                     INJECT_METHOD_DESCRIPTOR, null,
                     null);
             injectMethod.visitParameter("ctx", 0 /* modifiers */);
+            injectMethod.visitParameter("prefix", 1 /* modifiers */);
             injectMethod.visitCode();
             if (superTypeIsInjectable) {
                 // this
                 injectMethod.visitIntInsn(Opcodes.ALOAD, 0);
                 // ctx param
                 injectMethod.visitIntInsn(Opcodes.ALOAD, 1);
+                // prefix param
+                injectMethod.visitIntInsn(Opcodes.ALOAD, 2);
                 // call inject on our bean param field
                 injectMethod.visitMethodInsn(Opcodes.INVOKESPECIAL, superTypeName,
                         INJECT_METHOD_NAME,
@@ -261,6 +266,8 @@ public class ClassInjectorTransformer implements BiFunction<String, ClassVisitor
                         }
                         // ctx param
                         injectMethod.visitIntInsn(Opcodes.ALOAD, 1);
+                        // prefix param
+                        injectMethod.visitIntInsn(Opcodes.ALOAD, 2);
                         // call inject on our bean param field
                         injectMethod.visitMethodInsn(Opcodes.INVOKEINTERFACE, QUARKUS_REST_INJECTION_TARGET_BINARY_NAME,
                                 INJECT_METHOD_NAME,

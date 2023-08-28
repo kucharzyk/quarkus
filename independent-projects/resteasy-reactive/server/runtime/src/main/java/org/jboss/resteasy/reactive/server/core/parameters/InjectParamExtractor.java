@@ -23,7 +23,7 @@ public class InjectParamExtractor implements ParameterExtractor {
                 instance.close();
             }
         });
-        ((ResteasyReactiveInjectionTarget) instance.getInstance()).__quarkus_rest_inject(context);
+        ((ResteasyReactiveInjectionTarget) instance.getInstance()).__quarkus_rest_inject(context, null);
         return instance.getInstance();
     }
 }

@@ -20,8 +20,10 @@ public class MultipartTransformer implements BiFunction<String, ClassVisitor, Cl
             .replace('.', '/');
     private static final String INJECTION_CONTEXT_DESCRIPTOR = "L" + INJECTION_CONTEXT_BINARY_NAME + ";";
 
+    private static final String STRING_BINARY_NAME = String.class.getName().replace('.', '/');
+    private static final String STRING_DESCRIPTOR = "L" + STRING_BINARY_NAME + ";";
     private static final String INJECT_METHOD_NAME = "__quarkus_rest_inject";
-    private static final String INJECT_METHOD_DESCRIPTOR = "(" + INJECTION_CONTEXT_DESCRIPTOR + ")V";
+    private static final String INJECT_METHOD_DESCRIPTOR = "(" + INJECTION_CONTEXT_DESCRIPTOR + STRING_DESCRIPTOR + ")V";
 
     private final String populatorName;
 
@@ -74,17 +76,20 @@ public class MultipartTransformer implements BiFunction<String, ClassVisitor, Cl
                     INJECT_METHOD_DESCRIPTOR, null,
                     null);
             injectMethod.visitParameter("ctx", 0 /* modifiers */);
+            injectMethod.visitParameter("prefix", 1 /* modifiers */);
             injectMethod.visitCode();
 
             // this
             injectMethod.visitIntInsn(Opcodes.ALOAD, 0);
             // ctx param
             injectMethod.visitIntInsn(Opcodes.ALOAD, 1);
+            // prefix param
+            injectMethod.visitIntInsn(Opcodes.ALOAD, 2);
 
             // call the populator
             injectMethod.visitMethodInsn(Opcodes.INVOKESTATIC, populatorName.replace('.', '/'),
                     POPULATE_METHOD_NAME,
-                    String.format("(%s%s)V", thisDescriptor, INJECTION_CONTEXT_DESCRIPTOR), false);
+                    String.format("(%s%s%s)V", thisDescriptor, INJECTION_CONTEXT_DESCRIPTOR, STRING_DESCRIPTOR), false);
 
             injectMethod.visitInsn(Opcodes.RETURN);
             injectMethod.visitEnd();
