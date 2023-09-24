@@ -85,6 +85,7 @@ import org.jboss.resteasy.reactive.DummyElementType;
 import org.jboss.resteasy.reactive.MultipartForm;
 import org.jboss.resteasy.reactive.PartFilename;
 import org.jboss.resteasy.reactive.PartType;
+import org.jboss.resteasy.reactive.Prefixed;
 import org.jboss.resteasy.reactive.RestCookie;
 import org.jboss.resteasy.reactive.RestForm;
 import org.jboss.resteasy.reactive.RestHeader;
@@ -127,6 +128,7 @@ public final class ResteasyReactiveDotNames {
     public static final DotName PROVIDER = DotName.createSimple(Provider.class.getName());
     public static final DotName BEAN_PARAM = DotName.createSimple(BeanParam.class.getName());
     public static final DotName PATH_PARAM = DotName.createSimple(PathParam.class.getName());
+    public static final DotName PREFIXED_PARAM = DotName.createSimple(Prefixed.class.getName());
     public static final DotName QUERY_PARAM = DotName.createSimple(QueryParam.class.getName());
     public static final DotName HEADER_PARAM = DotName.createSimple(HeaderParam.class.getName());
     public static final DotName FORM_PARAM = DotName.createSimple(FormParam.class.getName());
@@ -252,7 +254,7 @@ public final class ResteasyReactiveDotNames {
             Arrays.asList(QUERY_PARAM, HEADER_PARAM, PATH_PARAM, MATRIX_PARAM, COOKIE_PARAM));
 
     public static final Set<DotName> JAX_RS_ANNOTATIONS_FOR_FIELDS = new HashSet<>(
-            Arrays.asList(BEAN_PARAM, MULTI_PART_FORM_PARAM, PATH_PARAM, QUERY_PARAM, HEADER_PARAM, FORM_PARAM, MATRIX_PARAM,
+            Arrays.asList(BEAN_PARAM, PREFIXED_PARAM, MULTI_PART_FORM_PARAM, PATH_PARAM, QUERY_PARAM, HEADER_PARAM, FORM_PARAM, MATRIX_PARAM,
                     COOKIE_PARAM, REST_PATH_PARAM, REST_QUERY_PARAM, REST_HEADER_PARAM, REST_FORM_PARAM, REST_MATRIX_PARAM,
                     REST_COOKIE_PARAM, CONTEXT, DEFAULT_VALUE, SUSPENDED));
 

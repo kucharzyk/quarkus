@@ -355,7 +355,11 @@ public class ResteasyReactiveScanner {
         beanParamAsBeanUsers.addAll(possibleSubResources.values());
 
         Collection<AnnotationInstance> unregisteredBeanParamAnnotations = new ArrayList<>(
-                index.getAnnotations(ResteasyReactiveDotNames.BEAN_PARAM));
+                index.getAnnotations(ResteasyReactiveDotNames.BEAN_PARAM)
+        );
+        unregisteredBeanParamAnnotations.addAll(
+                index.getAnnotations(ResteasyReactiveDotNames.PREFIXED_PARAM)
+        );
         boolean newBeanParamsRegistered;
         do {
             newBeanParamsRegistered = false;

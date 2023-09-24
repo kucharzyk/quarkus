@@ -40,6 +40,7 @@ import static org.jboss.resteasy.reactive.common.processor.ResteasyReactiveDotNa
 import static org.jboss.resteasy.reactive.common.processor.ResteasyReactiveDotNames.PATH;
 import static org.jboss.resteasy.reactive.common.processor.ResteasyReactiveDotNames.PATH_PARAM;
 import static org.jboss.resteasy.reactive.common.processor.ResteasyReactiveDotNames.PATH_SEGMENT;
+import static org.jboss.resteasy.reactive.common.processor.ResteasyReactiveDotNames.PREFIXED_PARAM;
 import static org.jboss.resteasy.reactive.common.processor.ResteasyReactiveDotNames.PRIMITIVE_BOOLEAN;
 import static org.jboss.resteasy.reactive.common.processor.ResteasyReactiveDotNames.PRIMITIVE_CHAR;
 import static org.jboss.resteasy.reactive.common.processor.ResteasyReactiveDotNames.PRIMITIVE_DOUBLE;
@@ -292,7 +293,7 @@ public abstract class EndpointIndexer<T extends EndpointIndexer<T, PARAM, METHOD
             // get an InjectableBean view of our class
             InjectableBean injectableBean = scanInjectableBean(classInfo, classInfo,
                     existingConverters,
-                    additionalReaders, injectableBeans, hasRuntimeConverters);
+                    additionalReaders, injectableBeans, hasRuntimeConverters, null);
 
             // at this point we've scanned the class and its bean infos, which can have form params
             if (injectableBean.isFormParamRequired()) {
@@ -608,7 +609,8 @@ public abstract class EndpointIndexer<T extends EndpointIndexer<T, PARAM, METHOD
                             anns, paramType, errorLocation, false, hasRuntimeConverters, pathParameters,
                             currentMethodInfo.parameterName(i),
                             consumes,
-                            methodContext);
+                            methodContext,
+                            null);
                 }
 
                 suspended |= parameterResult.isSuspended();
@@ -924,11 +926,12 @@ public abstract class EndpointIndexer<T extends EndpointIndexer<T, PARAM, METHOD
     }
 
     protected abstract InjectableBean scanInjectableBean(ClassInfo currentClassInfo,
-            ClassInfo actualEndpointInfo,
-            Map<String, String> existingConverters,
-            AdditionalReaders additionalReaders,
-            Map<String, InjectableBean> injectableBeans,
-            boolean hasRuntimeConverters);
+                                                         ClassInfo actualEndpointInfo,
+                                                         Map<String, String> existingConverters,
+                                                         AdditionalReaders additionalReaders,
+                                                         Map<String, InjectableBean> injectableBeans,
+                                                         boolean hasRuntimeConverters,
+                                                         String prefix);
 
     protected abstract MethodParameter createMethodParameter(ClassInfo currentClassInfo, ClassInfo actualEndpointInfo,
             boolean encoded, Type paramType, PARAM parameterResult, String name, String defaultValue,
@@ -1186,7 +1189,8 @@ public abstract class EndpointIndexer<T extends EndpointIndexer<T, PARAM, METHOD
             Map<DotName, AnnotationInstance> anns, Type paramType, String errorLocation, boolean field,
             boolean hasRuntimeConverters, Set<String> pathParameters, String sourceName,
             String[] declaredConsumes,
-            Map<String, Object> methodContext) {
+            Map<String, Object> methodContext,
+            String prefix) {
         PARAM builder = createIndexedParam()
                 .setCurrentClassInfo(currentClassInfo)
                 .setActualEndpointInfo(actualEndpointInfo)
@@ -1201,6 +1205,7 @@ public abstract class EndpointIndexer<T extends EndpointIndexer<T, PARAM, METHOD
                 .setSourceName(sourceName);
 
         AnnotationInstance beanParam = anns.get(BEAN_PARAM);
+        AnnotationInstance prefixedBeanParam = anns.get(PREFIXED_PARAM);
         AnnotationInstance multiPartFormParam = anns.get(MULTI_PART_FORM_PARAM);
         AnnotationInstance pathParam = anns.get(PATH_PARAM);
         AnnotationInstance queryParam = anns.get(QUERY_PARAM);
@@ -1224,9 +1229,9 @@ public abstract class EndpointIndexer<T extends EndpointIndexer<T, PARAM, METHOD
         if (handleCustomParameter(anns, builder, paramType, field, methodContext)) {
             return builder;
         } else if (moreThanOne(pathParam, queryParam, headerParam, formParam, cookieParam, contextParam, beanParam,
-                restPathParam, restQueryParam, restHeaderParam, restFormParam, restCookieParam)) {
+                prefixedBeanParam, restQueryParam, restHeaderParam, restFormParam, restCookieParam)) {
             throw new RuntimeException(
-                    "Cannot have more than one of @PathParam, @QueryParam, @HeaderParam, @FormParam, @CookieParam, @BeanParam, @Context on "
+                    "Cannot have more than one of @PathParam, @QueryParam, @HeaderParam, @FormParam, @CookieParam, @BeanParam, @Prefixed, @Context on "
                             + errorLocation);
         } else if (pathParam != null) {
             builder.setName(pathParam.value().asString());
@@ -1289,6 +1294,17 @@ public abstract class EndpointIndexer<T extends EndpointIndexer<T, PARAM, METHOD
             }
             // no name required
             builder.setType(ParameterType.CONTEXT);
+        } else if (prefixedBeanParam != null || prefix !=null) {
+            // no name required
+            builder.setType(ParameterType.BEAN);
+            builder.setPrefix(prefix != null ? prefix : "");
+            if (prefix == null) {
+                builder.setPrefix("");
+            } else if (prefix.isEmpty()) {
+                builder.setPrefix(sourceName);
+            } else {
+                builder.setPrefix(prefix + "." + sourceName);
+            }
         } else if (beanParam != null) {
             // no name required
             builder.setType(ParameterType.BEAN);

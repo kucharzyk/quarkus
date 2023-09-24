@@ -30,6 +30,7 @@ public class IndexedParameter<T extends IndexedParameter<T>> {
     protected boolean single;
     protected boolean optional;
     protected String separator;
+    protected String prefix;
 
     public boolean isObtainedAsCollection() {
         return !single
@@ -216,6 +217,15 @@ public class IndexedParameter<T extends IndexedParameter<T>> {
 
     public T setSeparator(String separator) {
         this.separator = separator;
+        return (T) this;
+    }
+
+    public String getPrefix() {
+        return prefix;
+    }
+
+    public T setPrefix(String prefix) {
+        this.prefix = prefix;
         return (T) this;
     }
 }

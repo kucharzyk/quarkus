@@ -192,7 +192,7 @@ public class ServerEndpointIndexer
         ClassInfo beanParamClassInfo = index.getClassByName(paramType.name());
         InjectableBean injectableBean = scanInjectableBean(beanParamClassInfo,
                 actualEndpointInfo,
-                existingConverters, additionalReaders, injectableBeans, hasRuntimeConverters);
+                existingConverters, additionalReaders, injectableBeans, hasRuntimeConverters, null);
         if ((injectableBean.getFieldExtractorsCount() == 0) && !injectableBean.isInjectionRequired()) {
             throw new DeploymentException(String.format("No annotations found on fields at '%s'. "
                     + "Annotations like `@QueryParam` should be used in fields, not in methods.",
@@ -249,7 +249,7 @@ public class ServerEndpointIndexer
     @Override
     protected InjectableBean scanInjectableBean(ClassInfo currentClassInfo, ClassInfo actualEndpointInfo,
             Map<String, String> existingConverters, AdditionalReaders additionalReaders,
-            Map<String, InjectableBean> injectableBeans, boolean hasRuntimeConverters) {
+            Map<String, InjectableBean> injectableBeans, boolean hasRuntimeConverters, String prefix) {
 
         // do not scan a bean twice
         String currentTypeName = currentClassInfo.name().toString();
@@ -275,7 +275,7 @@ public class ServerEndpointIndexer
                     additionalReaders,
                     annotations, field.type(), field.toString(), true, hasRuntimeConverters,
                     // We don't support annotation-less path params in injectable beans: only annotations
-                    Collections.emptySet(), field.name(), EMPTY_STRING_ARRAY, new HashMap<>());
+                    Collections.emptySet(), field.name(), EMPTY_STRING_ARRAY, new HashMap<>(), prefix);
             if ((result.getType() != null) && (result.getType() != ParameterType.BEAN)) {
                 //BODY means no annotation, so for fields not injectable
                 fieldExtractors.put(field, result);
@@ -286,7 +286,7 @@ public class ServerEndpointIndexer
                 // FIXME: pretty sure this doesn't work with generics
                 ClassInfo beanParamClassInfo = index.getClassByName(field.type().name());
                 InjectableBean injectableBean = scanInjectableBean(beanParamClassInfo, actualEndpointInfo,
-                        existingConverters, additionalReaders, injectableBeans, hasRuntimeConverters);
+                        existingConverters, additionalReaders, injectableBeans, hasRuntimeConverters, result.getPrefix());
                 // inherit form param requirement from field
                 if (injectableBean.isFormParamRequired()) {
                     currentInjectableBean.setFormParamRequired(true);
@@ -323,7 +323,7 @@ public class ServerEndpointIndexer
             ClassInfo superClass = index.getClassByName(superClassName);
             if (superClass != null) {
                 InjectableBean superInjectableBean = scanInjectableBean(superClass, actualEndpointInfo,
-                        existingConverters, additionalReaders, injectableBeans, hasRuntimeConverters);
+                        existingConverters, additionalReaders, injectableBeans, hasRuntimeConverters, null);
                 superTypeIsInjectable = superInjectableBean.isInjectionRequired();
                 // inherit form param requirement from supertype
                 if (superInjectableBean.isFormParamRequired()) {
