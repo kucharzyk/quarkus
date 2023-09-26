@@ -1226,6 +1226,13 @@ public abstract class EndpointIndexer<T extends EndpointIndexer<T, PARAM, METHOD
         if (defaultValueAnnotation != null) {
             builder.setDefaultValue(defaultValueAnnotation.value().asString());
         }
+
+        if (prefixedBeanParam != null) {
+            builder.setPrefix(concatPrefix(prefix, sourceName));
+        } else {
+            builder.setPrefix(prefix);
+        }
+
         if (handleCustomParameter(anns, builder, paramType, field, methodContext)) {
             return builder;
         } else if (moreThanOne(pathParam, queryParam, headerParam, formParam, cookieParam, contextParam, beanParam,
@@ -1463,6 +1470,14 @@ public abstract class EndpointIndexer<T extends EndpointIndexer<T, PARAM, METHOD
         }
         builder.setElementType(elementType);
         return builder;
+    }
+
+    public String concatPrefix(String prefix, String name) {
+        if (prefix == null || prefix.isEmpty()) {
+            return name;
+        } else {
+            return prefix + "." + name;
+        }
     }
 
     private boolean isFormParamConvertible(Type paramType) {
