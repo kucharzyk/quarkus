@@ -926,12 +926,12 @@ public abstract class EndpointIndexer<T extends EndpointIndexer<T, PARAM, METHOD
     }
 
     protected abstract InjectableBean scanInjectableBean(ClassInfo currentClassInfo,
-                                                         ClassInfo actualEndpointInfo,
-                                                         Map<String, String> existingConverters,
-                                                         AdditionalReaders additionalReaders,
-                                                         Map<String, InjectableBean> injectableBeans,
-                                                         boolean hasRuntimeConverters,
-                                                         String prefix);
+            ClassInfo actualEndpointInfo,
+            Map<String, String> existingConverters,
+            AdditionalReaders additionalReaders,
+            Map<String, InjectableBean> injectableBeans,
+            boolean hasRuntimeConverters,
+            String prefix);
 
     protected abstract MethodParameter createMethodParameter(ClassInfo currentClassInfo, ClassInfo actualEndpointInfo,
             boolean encoded, Type paramType, PARAM parameterResult, String name, String defaultValue,
@@ -1301,7 +1301,7 @@ public abstract class EndpointIndexer<T extends EndpointIndexer<T, PARAM, METHOD
             }
             // no name required
             builder.setType(ParameterType.CONTEXT);
-        } else if (prefixedBeanParam != null || prefix !=null) {
+        } else if (prefixedBeanParam != null || prefix != null) {
             // no name required
             builder.setType(ParameterType.BEAN);
             builder.setPrefix(prefix != null ? prefix : "");
