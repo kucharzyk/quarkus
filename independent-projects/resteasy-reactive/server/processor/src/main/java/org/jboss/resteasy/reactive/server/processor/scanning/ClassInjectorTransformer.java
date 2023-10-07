@@ -820,9 +820,10 @@ public class ClassInjectorTransformer implements BiFunction<String, ClassVisitor
 
         private void invokeMultipartSupport(ServerIndexedParameter param, MethodVisitor injectMethod,
                 String singleOperationName, String singleOperationReturnDescriptor) {
+            String name = prefixedName(param);
             if (param.isSingle()) {
                 // name param
-                injectMethod.visitLdcInsn(param.getName());
+                injectMethod.visitLdcInsn(name);
                 // ctx param
                 injectMethod.visitIntInsn(Opcodes.ALOAD, 1);
                 injectMethod.visitTypeInsn(Opcodes.CHECKCAST, RESTEASY_REACTIVE_REQUEST_CONTEXT_BINARY_NAME);
@@ -833,7 +834,7 @@ public class ClassInjectorTransformer implements BiFunction<String, ClassVisitor
 
             } else {
                 // name param
-                injectMethod.visitLdcInsn(param.getName());
+                injectMethod.visitLdcInsn(name);
                 // ctx param
                 injectMethod.visitIntInsn(Opcodes.ALOAD, 1);
                 injectMethod.visitTypeInsn(Opcodes.CHECKCAST, RESTEASY_REACTIVE_REQUEST_CONTEXT_BINARY_NAME);
@@ -900,7 +901,8 @@ public class ClassInjectorTransformer implements BiFunction<String, ClassVisitor
             // ctx param
             injectMethod.visitIntInsn(Opcodes.ALOAD, 1);
             // name param
-            injectMethod.visitLdcInsn(extractor.getName());
+            String name = prefixedName(extractor);
+            injectMethod.visitLdcInsn(name);
             String methodSignature;
             if (extraEncodedParam && extraSingleParameter && extraSeparatorParam) {
                 injectMethod.visitLdcInsn(extractor.isSingle());
@@ -954,6 +956,12 @@ public class ClassInjectorTransformer implements BiFunction<String, ClassVisitor
                 injectMethod.visitLdcInsn(extractor.getDefaultValue());
                 injectMethod.visitLabel(wasNonNullTarget);
             }
+        }
+
+        private static String prefixedName(IndexedParameter extractor) {
+            return extractor.getPrefix() == null || extractor.getPrefix().isEmpty()
+                    ? extractor.getName()
+                    : extractor.getPrefix() + "." + extractor.getName();
         }
     }
 
